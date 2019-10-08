@@ -1,0 +1,57 @@
+<?php
+
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\ReplaceCommand;
+
+#implements hook_form_FORM_ID_alter
+function testmodule_form_node_testcontenu_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id){
+
+  $form['#validate'][] = 'test_validate';//adding validate property
+  $form['title']['widget'][0]['value']['#value'] = 'Test Pays';
+
+  #adding ajax property on the pays field
+  $form['field_pays']['widget']['#ajax']= [
+        'callback'=>'myAjaxCallback',
+        'event'=>'change',
+        'wrapper'=> 'field-titre',
+        'progress' => [
+          'type' => 'throbber',
+          'message' => t('Verifying entry...')
+        ]
+
+      ];
+
+
+}
+#validate /**
+function test_validate(&$form, \Drupal\Core\Form\FormStateInterface $form_state){
+
+  $description = $form_state ->getValue('body');//un tableau multidimension
+  $string_description = $description[0]['value'];
+
+  $message = 'le champs description doit contenir le mot \'test\'';
+  //check if the description field contains 'test'
+  if(stristr($string_description, 'test') === FALSE){
+
+    $form_state -> setErrorByName('body',  $message);
+  }
+
+}
+#callback /**
+function myAjaxCallback(&$form, \Drupal\Core\Form\FormStateInterface $form_state){
+
+  if ($selectedValue = $form_state->getValue('field_pays')) {
+      // Get the key of the selected option.
+      $selectedPays = $selectedValue[0]['target_id'];
+      //Get the value of selected option
+      $selectedPaysLabel = $form['field_pays']['widget']['#options'][$selectedPays];
+      // Place the text of the selected option in our title.
+      $form['title']['widget'][0]['value']['#value'] = $selectedValue;
+  }
+  // Return the title field
+  return $form['title']['widget'][0]['value']['#value'];
+
+
+
+}
