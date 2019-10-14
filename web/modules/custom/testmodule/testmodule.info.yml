@@ -1,0 +1,7 @@
+#module name
+name: Testmodule
+description: module for trainning
+type: module
+version: 1.x-1.0
+core: 8.x
+package: test
